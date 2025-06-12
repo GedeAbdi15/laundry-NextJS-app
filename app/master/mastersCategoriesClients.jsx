@@ -2,14 +2,19 @@
 
 import { Button, Space, Table, Modal, Form, Input, message } from "antd";
 import { useState } from "react";
-import { postRoles, getRoles, deleteRole, putRoles } from "../../lib/api/roles";
+import {
+    postCategories,
+    getCategories,
+    deleteCategories,
+    putCategories,
+} from "../../lib/api/category";
 import "@ant-design/v5-patch-for-react-19";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 
-const MasterRolesClients = ({ roles }) => {
+const MasterCategoriesClients = ({ category }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [form] = Form.useForm();
-    const [dataSource, setDataSource] = useState(roles);
+    const [dataSource, setDataSource] = useState(category);
     const [isEditing, setIsEditing] = useState(false);
     const [currentRecord, setCurrentRecord] = useState(null);
 
@@ -30,13 +35,14 @@ const MasterRolesClients = ({ roles }) => {
 
     const handleAdd = async (values) => {
         try {
-            const newRole = await postRoles(values);
-            message.success("Role added successfully!");
+            const newCategory = await postCategories(values);
+            message.success("Category added successfully!");
 
-            const updatedRoles = await getRoles();
-            setDataSource(updatedRoles);
+            const updatedCategory = await getCategories();
+            setDataSource(
+                updatedCategory.map((item) => ({ ...item, key: item.id }))
+            );
 
-            setDataSource((prev) => [...prev, { ...newRole, key: Date.now() }]);
             form.resetFields();
             setIsModalOpen(false);
         } catch (err) {
@@ -46,12 +52,12 @@ const MasterRolesClients = ({ roles }) => {
 
     const handleEdit = async (values) => {
         try {
-            const editRole = await putRoles(values, values.id);
-            message.success("Role editted successfully!");
+            const editCategory = await putCategories(values, values.id);
+            message.success("Category updated successfully!");
 
-            const updatedRoles = await getRoles(values);
+            const updatedCategory = await getCategories();
             setDataSource(
-                updatedRoles.map((item) => ({ ...item, key: item.id }))
+                updatedCategory.map((item) => ({ ...item, key: item.id }))
             );
 
             form.resetFields();
@@ -74,12 +80,12 @@ const MasterRolesClients = ({ roles }) => {
     const handleDelete = async (id) => {
         console.log("deleting id : ", id);
         try {
-            const result = await deleteRole(id);
+            const result = await deleteCategories(id);
             console.log("result", result);
 
-            message.success("Role deleted seccessfully!");
+            message.success("Category deleted seccessfully!");
 
-            const updated = await getRoles();
+            const updated = await getCategories();
             setDataSource(updated.map((item) => ({ ...item, key: item.id })));
         } catch (error) {
             console.log("result", result);
@@ -89,15 +95,15 @@ const MasterRolesClients = ({ roles }) => {
 
     const columns = [
         {
-            title: "Role ID",
+            title: "Category ID",
             dataIndex: "id",
             key: "id",
         },
 
         {
-            title: "Name",
-            dataIndex: "role",
-            key: "role",
+            title: "Category Name",
+            dataIndex: "category",
+            key: "category",
             render: (text) => <p>{text}</p>,
         },
 
@@ -121,7 +127,7 @@ const MasterRolesClients = ({ roles }) => {
                         icon={<DeleteOutlined />}
                         onClick={() =>
                             Modal.confirm({
-                                title: "Are you sure want to delete this role(s)?",
+                                title: "Are you sure want to delete this category(s)?",
                                 okText: "Yes",
                                 okType: "danger",
                                 cancelText: "Cancel",
@@ -138,19 +144,19 @@ const MasterRolesClients = ({ roles }) => {
 
     return (
         <>
-            <div className="flex w-full justify-between mb-3 mt-5">
-                <h3 className="capitalize mb-3">master role</h3>
+            <div className="flex w-full justify-between mt-3 mb-3">
+                <h3 className="capitalize mb-3">master categories</h3>
                 <Button
                     type="primary"
                     className="capitalize"
                     onClick={showModal}
                 >
-                    add new role
+                    add new category
                 </Button>
             </div>
 
             <Modal
-                title={isEditing ? "Edit Role" : "Add New Role"}
+                title={isEditing ? "Edit Category" : "Add New Category"}
                 open={isModalOpen}
                 onCancel={() => {
                     handleCancel();
@@ -171,8 +177,8 @@ const MasterRolesClients = ({ roles }) => {
                     }}
                 >
                     <Form.Item
-                        label="Role"
-                        name="role"
+                        label="Category"
+                        name="category"
                         rules={[{ required: true }]}
                     >
                         <Input />
@@ -192,4 +198,4 @@ const MasterRolesClients = ({ roles }) => {
     );
 };
 
-export default MasterRolesClients;
+export default MasterCategoriesClients;
