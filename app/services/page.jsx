@@ -1,14 +1,21 @@
-import ServiceUI from "./Services";
+import { getServices } from "../../lib/api/service";
+import Sidebar from "../components/Sidebar";
+import ServiceClients from "./servicesClients";
 
 export const metadata = {
     title: "Services",
     description: "Services Page",
 };
 
-const Services = () => {
+const Services = async () => {
+    const services = await getServices();
+
     return (
         <>
-            <ServiceUI />
+            <Sidebar />
+            <main className="p-4 px-8 sm:ml-64">
+                <ServiceClients services={services} />
+            </main>
         </>
     );
 };

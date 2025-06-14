@@ -1,22 +1,22 @@
 import Sidebar from "../components/Sidebar";
 import MasterRolesClients from "./mastersRolesClients";
 import MasterServicesClients from "./mastersServicesClients";
+import MasterCategoriesClients from "./mastersCategoriesClients";
 import { getRoles } from "../../lib/api/roles";
 import { getServices } from "../../lib/api/service";
+import { getCategories } from "../../lib/api/category";
 
 const Master = async () => {
     const roles = await getRoles();
     const services = await getServices();
+    const category = await getCategories();
 
     return (
         <>
             <Sidebar />
-            <main className="p-4 sm:ml-64">
-                <h1 className="text-2xl capitalize text-center md:text-start mb-3">
-                    Master
-                </h1>
-
+            <main className="p-4 px-8 sm:ml-64">
                 <MasterRolesClients roles={roles} />
+                <MasterCategoriesClients category={category} />
                 <MasterServicesClients services={services} />
             </main>
         </>
