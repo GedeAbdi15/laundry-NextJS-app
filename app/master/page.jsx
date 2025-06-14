@@ -14,7 +14,7 @@ const Master = async () => {
     return (
         <>
             <Sidebar />
-            <main className="p-4 sm:ml-64">
+            <main className="p-4 px-8 sm:ml-64">
                 <MasterRolesClients roles={roles} />
                 <MasterCategoriesClients category={category} />
                 <MasterServicesClients services={services} />

@@ -36,7 +36,6 @@ const MasterRolesClients = ({ roles }) => {
             const updatedRoles = await getRoles();
             setDataSource(updatedRoles);
 
-            setDataSource((prev) => [...prev, { ...newRole, key: Date.now() }]);
             form.resetFields();
             setIsModalOpen(false);
         } catch (err) {

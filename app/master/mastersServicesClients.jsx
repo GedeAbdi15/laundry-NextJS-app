@@ -50,6 +50,7 @@ const MasterServicesClients = ({ services }) => {
             type: record.type || undefined,
             duration_days: record.duration_days || 0,
             unit: record.unit || undefined,
+            price: record.price || 0,
             description: record.description || "",
         });
     };
@@ -63,6 +64,7 @@ const MasterServicesClients = ({ services }) => {
                 type: values.type,
                 duration_days: parseInt(values.duration_days),
                 unit: values.unit,
+                price: values.price,
                 description: values.description,
             };
 
@@ -95,6 +97,7 @@ const MasterServicesClients = ({ services }) => {
                 type: values.type,
                 duration_days: parseInt(values.duration_days),
                 unit: values.unit,
+                price: values.price,
                 description: values.description,
             };
 
@@ -165,6 +168,11 @@ const MasterServicesClients = ({ services }) => {
             title: "Unit",
             dataIndex: "unit",
             key: "unit",
+        },
+        {
+            title: "Price",
+            dataIndex: "price",
+            key: "price",
         },
         {
             title: "Description",
@@ -319,6 +327,9 @@ const MasterServicesClients = ({ services }) => {
                             <Select.Option value="kg">Kg</Select.Option>
                             <Select.Option value="item">Item</Select.Option>
                         </Select>
+                    </Form.Item>
+                    <Form.Item label="Price" name="price">
+                        <Input />
                     </Form.Item>
                     <Form.Item label="Description" name="description">
                         <Input />
