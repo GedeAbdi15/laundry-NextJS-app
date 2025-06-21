@@ -1,14 +1,18 @@
+import { getOrders } from "../../lib/api/order";
 import Sidebar from "../components/Sidebar";
+import OrdersClients from "./ordersClients";
 
-const Billing = () => {
+const Orders = async () => {
+    const orders = await getOrders();
+
     return (
         <>
             <Sidebar />
             <main className="p-4 sm:ml-64">
-                <h1 className="text-2xl capitalize text-center">billing</h1>
+                <OrdersClients orders={orders} />
             </main>
         </>
     );
 };
 
-export default Billing;
+export default Orders;
