@@ -1,8 +1,10 @@
 "use client";
 
+import { MenuFoldOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import "@ant-design/v5-patch-for-react-19";
 
 const Sidebar = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -21,6 +23,10 @@ const Sidebar = () => {
                 aria-label="Sidebar"
             >
                 <div className="h-full ml-2 px-3 py-4 overflow-y-auto bg-[#8DD8FF] dark:bg-[#5409DA] rounded-t-2xl rounded-b-2xl shadow-xl">
+                    <div className="flex justify-end mb-3 text-white">
+                        <MenuFoldOutlined style={{ color: "#ffff" }} />
+                    </div>
+
                     <ul className="space-y-2 font-medium">
                         {/* dashboard */}
                         <li>

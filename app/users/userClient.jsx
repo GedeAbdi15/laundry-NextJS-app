@@ -1,49 +1,213 @@
 "use client";
 
-import { useState } from "react";
-import { Button, Modal, Form, Input, message } from "antd";
+import { useEffect, useState } from "react";
+import {
+    Button,
+    Space,
+    Table,
+    Form,
+    Modal,
+    Input,
+    message,
+    Select,
+} from "antd";
+import {
+    deleteUsers,
+    getUsers,
+    postUsers,
+    putUsers,
+} from "../../lib/api/users";
+import { getRoles } from "../../lib/api/roles";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 
 const UsersClient = ({ users }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-
+    const [isEditing, setIsEditing] = useState(false);
     const [form] = Form.useForm();
+    const [currentRecord, setCurrentRecord] = useState(null);
+    const [roles, setRoles] = useState([]);
+    const [dataSource, setDataSource] = useState(
+        users.map((item) => ({ ...item, key: item.id }))
+    );
 
-    const showModal = () => setIsModalOpen(true);
+    const showModal = () => {
+        setIsModalOpen(true);
+        setCurrentRecord(null);
+        form.resetFields();
+        setIsEditing(false);
+    };
+
+    const showEditModal = (record) => {
+        console.log("isi record", record);
+        setIsModalOpen(true);
+        setIsEditing(true);
+        setCurrentRecord(record);
+        form.setFieldsValue(record);
+    };
     const handleCancel = () => setIsModalOpen(false);
 
-    const handleFinish = async (values) => {
-        console.log("Form val: ", values);
+    const handleAdd = async (values) => {
+        console.log("values : ", values);
         try {
             const payload = {
-                ...values,
-                role: parseInt(values.role),
+                name: values.name,
+                email: values.email,
+                password: values.password,
+                role_id: values.role_id,
+                phone_number: values.phone_number,
             };
 
-            const res = await fetch("http://localhost:4000/users", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(payload),
-            });
+            console.log("payload value : ", payload);
 
-            const result = await res.json();
+            const newUsers = await postUsers(payload);
+            message.success("Order added successfully!");
 
-            if (!res.ok) {
-                console.error("Server error:", result);
-                return;
-            }
+            const updateUsers = await getUsers();
+            setDataSource(
+                updateUsers.map((item) => ({ ...item, key: item.id }))
+            );
 
-            console.log("Success:", result);
-
-            message.success("User berhasil ditambahkan");
-            message.error("Gagal menambahkan user");
-
-            setIsModalOpen(false);
             form.resetFields();
-            window.location.reload();
+            setIsModalOpen(false);
+        } catch (err) {
+            message.error(err.message);
+        }
+    };
+
+    const handleEdit = async (values) => {
+        try {
+            const payload = {
+                id: values.id,
+                name: values.name,
+                email: values.email,
+                password: values.password,
+                role_id: values.role_id,
+                phone_number: values.phone_number,
+            };
+
+            console.log("payload value : ", payload);
+
+            const editUsers = await putUsers(payload, values.id);
+            message.success("Order editted successfully!");
+            const updatedUsers = await getUsers(values);
+
+            setDataSource(
+                updatedUsers.map((item) => ({ ...item, key: item.id }))
+            );
+
+            form.resetFields();
+            setIsModalOpen(false);
+            setIsEditing(false);
+            setCurrentRecord(null);
+        } catch (err) {
+            message.error(err.message);
+        }
+    };
+
+    const handleFinish = async (values) => {
+        if (isEditing && currentRecord) {
+            await handleEdit({ ...currentRecord, ...values });
+        } else {
+            await handleAdd(values);
+        }
+    };
+
+    const handleDelete = async (id) => {
+        console.log("deleting id : ", id);
+        try {
+            const result = await deleteUsers(id);
+            console.log("result", result);
+
+            message.success("Service deleted seccessfully!");
+
+            const updated = await getUsers();
+            setDataSource(updated.map((item) => ({ ...item, key: item.id })));
         } catch (error) {
-            console.log("Submit error : ", error);
+            console.log("result", result);
+            message.error(error.message);
+        }
+    };
+
+    const columns = [
+        {
+            title: "Name",
+            dataIndex: "name",
+            key: "name",
+            render: (text) => <p>{text}</p>,
+        },
+        {
+            title: "Email",
+            dataIndex: "email",
+            key: "email",
+        },
+        {
+            title: "Role",
+            dataIndex: "role_id",
+            key: "role_id",
+        },
+        {
+            title: "Phone Number",
+            dataIndex: "phone_number",
+            key: "phone_number",
+            render: (text) => (
+                <p className="capitalize">
+                    {text == null ? "belum diinput" : text}
+                </p>
+            ),
+        },
+        {
+            title: "Action",
+            key: "action",
+            render: (_, record) => (
+                <Space size="middle">
+                    <Button
+                        color="purple"
+                        variant="outlined"
+                        icon={<EditOutlined />}
+                        onClick={() => showEditModal(record)}
+                    >
+                        Edit
+                    </Button>
+
+                    <Button
+                        color="danger"
+                        variant="outlined"
+                        icon={<DeleteOutlined />}
+                        onClick={() =>
+                            Modal.confirm({
+                                title: "Are you sure want to delete this user(s)?",
+                                okText: "Yes",
+                                okType: "danger",
+                                cancelText: "Cancel",
+                                onOk: () => handleDelete(record.id),
+                            })
+                        }
+                    >
+                        Delete
+                    </Button>
+                </Space>
+            ),
+        },
+    ];
+
+    useEffect(() => {
+        const fetchRole = async () => {
+            try {
+                const res = await getRoles();
+                setRoles(res);
+                console.log("res useeffect role: ", res);
+            } catch (error) {
+                message.error("Failed to load categories");
+            }
+        };
+
+        fetchRole();
+    }, []);
+
+    const onRoleChange = async (value) => {
+        const selected = roles.find((role) => role.id === value);
+        if (selected) {
+            form.setFieldsValue({ note: `You selected ${selected.role}` });
         }
     };
 
@@ -61,7 +225,7 @@ const UsersClient = ({ users }) => {
             </div>
 
             <Modal
-                title="Add New User"
+                title={isEditing ? "Edit User" : "Add New User"}
                 open={isModalOpen}
                 onCancel={handleCancel}
                 onOk={() => form.submit()}
@@ -86,15 +250,25 @@ const UsersClient = ({ users }) => {
                     <Form.Item
                         label="Email"
                         name="email"
-                        rules={[{ required: true, type: "email" }]}
+                        rules={[{ type: "email" }]}
                     >
                         <Input />
                     </Form.Item>
                     <Form.Item label="Password" name="password">
                         <Input.Password />
                     </Form.Item>
-                    <Form.Item label="Role" name="role">
-                        <Input type="number" />
+                    <Form.Item label="Role" name="role_id">
+                        <Select
+                            placeholder="Select a role of this user"
+                            onChange={onRoleChange}
+                            allowClear
+                        >
+                            {roles.map((role) => (
+                                <Select.Option key={role.id} value={role.id}>
+                                    {role.id} - {role.role}
+                                </Select.Option>
+                            ))}
+                        </Select>
                     </Form.Item>
                     <Form.Item label="Phone Number" name="phone_number">
                         <Input />
@@ -102,52 +276,7 @@ const UsersClient = ({ users }) => {
                 </Form>
             </Modal>
 
-            {/* Table */}
-            <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-                <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-[#4E71FF] dark:text-white">
-                        <tr>
-                            <th className="capitalize px-6 py-3">name</th>
-                            <th className="capitalize px-6 py-3">email</th>
-                            <th className="capitalize px-6 py-3">role</th>
-                            <th className="capitalize px-6 py-3">
-                                phone number
-                            </th>
-                            <th className="capitalize px-6 py-3">action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {users.map((user, index) => (
-                            <tr
-                                key={index}
-                                className="odd:bg-white odd:dark:bg-[#8DD8FF] even:bg-gray-50 even:dark:bg-[#BBFBFF] text-gray-900"
-                            >
-                                <th
-                                    scope="row"
-                                    className="capitalize px-6 py-4 font-medium whitespace-nowrap"
-                                >
-                                    {user.name}
-                                </th>
-                                <td className="px-6 py-4">{user.email}</td>
-                                <td className="px-6 py-4">
-                                    {user.role ?? "None"}
-                                </td>
-                                <td className="px-6 py-4">
-                                    {user.phone_number || "Belum Diinput"}
-                                </td>
-                                <td className="px-6 py-4">
-                                    <a
-                                        href="#"
-                                        className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                                    >
-                                        Edit
-                                    </a>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <Table columns={columns} dataSource={dataSource} />
         </>
     );
 };
