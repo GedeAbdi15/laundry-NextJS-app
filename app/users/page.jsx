@@ -1,11 +1,9 @@
+import { getUsers } from "../../lib/api/users";
 import Sidebar from "../components/Sidebar";
 import UsersClient from "./userClient";
 
 const Users = async () => {
-    const data = await fetch("http://localhost:4000/users", {
-        cache: "no-store",
-    });
-    const { users } = await data.json();
+    const users = await getUsers();
 
     return (
         <>

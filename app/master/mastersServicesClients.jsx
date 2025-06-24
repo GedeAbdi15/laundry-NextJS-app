@@ -78,10 +78,10 @@ const MasterServicesClients = ({ services }) => {
                 updatedService.map((item) => ({ ...item, key: item.id }))
             );
 
-            setDataSource((prev) => [
-                ...prev,
-                { ...newService, key: Date.now() },
-            ]);
+            // setDataSource((prev) => [
+            //     ...prev,
+            //     { ...newService, key: Date.now() },
+            // ]);
             form.resetFields();
             setIsModalOpen(false);
         } catch (err) {
