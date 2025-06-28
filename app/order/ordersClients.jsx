@@ -11,7 +11,11 @@ import {
     message,
     Select,
 } from "antd";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import {
+    DeleteOutlined,
+    EditOutlined,
+    FileAddOutlined,
+} from "@ant-design/icons";
 import "@ant-design/v5-patch-for-react-19";
 import { useEffect, useState } from "react";
 import {
@@ -21,7 +25,9 @@ import {
     putOrders,
 } from "../../lib/api/order";
 import { getServices } from "../../lib/api/service";
-import { getUsers } from "../../lib/api/users";
+import { getCustomers, getUsers } from "../../lib/api/users";
+import { formatRupiah } from "../../lib/utility/idrFormat";
+import { getInvoice, postInvoice } from "../../lib/api/invoice";
 
 const getTitlePage = (path) => {
     switch (path) {
@@ -54,6 +60,9 @@ const OrdersClients = ({ orders }) => {
     );
     const [services, setServices] = useState([]);
     const [users, setUsers] = useState([]);
+    const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+    const [printLoading, setPrintLoading] = useState(false);
+    const [printData, setPrintData] = useState(null);
 
     const showModal = () => {
         setIsModalOpen(true);
@@ -76,7 +85,9 @@ const OrdersClients = ({ orders }) => {
             const payload = {
                 users_id: values.users_id,
                 services_id: values.services_id,
-                total_weight: values.total_weight,
+                total_weight: values.total_weight
+                    ? parseFloat(values.total_weight)
+                    : null,
                 total_item: values.total_item,
                 total_price: values.total_price,
                 status: values.status,
@@ -104,7 +115,9 @@ const OrdersClients = ({ orders }) => {
             const payload = {
                 users_id: values.users_id,
                 services_id: values.services_id,
-                total_weight: values.total_weight,
+                total_weight: values.total_weight
+                    ? parseFloat(values.total_weight)
+                    : null,
                 total_item: values.total_item,
                 total_price: values.total_price,
                 status: values.status,
@@ -148,6 +161,37 @@ const OrdersClients = ({ orders }) => {
         } catch (error) {
             console.log("result", result);
             message.error(error.message);
+        }
+    };
+
+    const showPrintPreview = (record) => {
+        setIsPrintModalOpen(true);
+        setPrintLoading(true);
+        setPrintData(record);
+
+        setTimeout(() => {
+            setPrintLoading(false);
+        }, 1500);
+
+        console.log("record invoice : ", record);
+    };
+
+    const handleCreateInvoice = async () => {
+        try {
+            const payload = {
+                orders_id: printData.id,
+            };
+
+            setPrintLoading(true);
+            await postInvoice(payload);
+            message.success("Invoice added successfully!");
+
+            setIsPrintModalOpen(false);
+            setPrintLoading(false);
+            setPrintData(null);
+        } catch (err) {
+            setPrintLoading(false);
+            message.error(err.message);
         }
     };
 
@@ -198,11 +242,17 @@ const OrdersClients = ({ orders }) => {
             title: "Total Weight",
             dataIndex: "total_weight",
             key: "total_weight",
+            render: (text) => (
+                <p className="capitalize">{text == null ? "-" : text}</p>
+            ),
         },
         {
             title: "Total Item",
             dataIndex: "total_item",
             key: "total_item",
+            render: (text) => (
+                <p className="capitalize">{text == null ? "-" : text}</p>
+            ),
         },
         {
             title: "Unit",
@@ -230,6 +280,15 @@ const OrdersClients = ({ orders }) => {
             key: "action",
             render: (_, record) => (
                 <Space size="middle">
+                    <Button
+                        color="cyan"
+                        variant="outlined"
+                        icon={<FileAddOutlined />}
+                        onClick={() => showPrintPreview(record)}
+                    >
+                        Invoice
+                    </Button>
+
                     <Button
                         color="purple"
                         variant="outlined"
@@ -277,7 +336,7 @@ const OrdersClients = ({ orders }) => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const res = await getUsers();
+                const res = await getCustomers();
                 setUsers(res);
                 console.log("res users: ", res);
             } catch (error) {
@@ -355,9 +414,9 @@ const OrdersClients = ({ orders }) => {
                     create new order
                 </Button>
             </div>
-
             <Modal
                 title={isEditing ? "Edit Order" : "Add New Order"}
+                centered
                 open={isModalOpen}
                 onCancel={handleCancel}
                 onOk={() => form.submit()}
@@ -436,6 +495,83 @@ const OrdersClients = ({ orders }) => {
                             </Select.Option>
                             <Select.Option value="done">Done</Select.Option>
                         </Select>
+                    </Form.Item>
+                </Form>
+            </Modal>
+
+            <Modal
+                title="Create Invoice"
+                open={isPrintModalOpen}
+                centered
+                loading={printLoading}
+                onCancel={() => setIsPrintModalOpen(false)}
+                footer={[
+                    <Button
+                        key="close"
+                        onClick={() => setIsPrintModalOpen(false)}
+                    >
+                        Close
+                    </Button>,
+                    <Button
+                        key="submit"
+                        variant="solid"
+                        color="primary"
+                        onClick={handleCreateInvoice}
+                    >
+                        Create
+                    </Button>,
+                ]}
+            >
+                <Form
+                    layout="horizontal"
+                    className="capitalize"
+                    form={form}
+                    onFinish={handleCreateInvoice}
+                    onFinishFailed={(err) => {
+                        console.log("Form failed:", err);
+                    }}
+                >
+                    <Form.Item label="Order ID" name="id">
+                        <span className="font-bold">{printData?.id}</span>
+                    </Form.Item>
+                    <Form.Item label="Customer" name="users_name">
+                        <span className="font-bold">
+                            {printData?.user_name}
+                        </span>
+                    </Form.Item>
+                    <Form.Item label="Service" name="service_name">
+                        <span className="font-bold">
+                            {printData?.service_name}
+                        </span>
+                    </Form.Item>
+                    <Form.Item label="Phone Number" name="phone_number">
+                        <span className="font-bold">
+                            {printData?.phone_number ?? "-"}
+                        </span>
+                    </Form.Item>
+                    <Form.Item label="Category" name="category">
+                        <span className="font-bold">{printData?.category}</span>
+                    </Form.Item>
+                    <Form.Item label="Type" name="type">
+                        <span className="font-bold">{printData?.type}</span>
+                    </Form.Item>
+                    <Form.Item label="Total Weight" name="total_weight">
+                        <span className="font-bold">
+                            {printData?.total_weight ?? "-"} {printData?.unit}
+                        </span>
+                    </Form.Item>
+                    <Form.Item label="Total Item" name="total_item">
+                        <span className="font-bold">
+                            {printData?.total_item ?? "-"}
+                        </span>
+                    </Form.Item>
+                    <Form.Item label="Total Price" name="total_price">
+                        <span className="font-bold">
+                            {formatRupiah(printData?.total_price)}
+                        </span>
+                    </Form.Item>
+                    <Form.Item label="Status" name="status">
+                        <span className="font-bold">{printData?.status}</span>
                     </Form.Item>
                 </Form>
             </Modal>

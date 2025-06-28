@@ -253,6 +253,7 @@ const MasterServicesClients = ({ services }) => {
 
             <Modal
                 title={isEditing ? "Edit Service" : "Add New Service"}
+                centered
                 open={isModalOpen}
                 onCancel={handleCancel}
                 onOk={() => form.submit()}
@@ -298,10 +299,10 @@ const MasterServicesClients = ({ services }) => {
                             onChange={onTypeChange}
                             allowClear
                         >
-                            <Select.Option value="Express">
+                            <Select.Option value="express">
                                 Express
                             </Select.Option>
-                            <Select.Option value="Regular">
+                            <Select.Option value="regular">
                                 Regular
                             </Select.Option>
                         </Select>

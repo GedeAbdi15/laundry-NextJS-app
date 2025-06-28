@@ -133,7 +133,7 @@ const UsersClient = ({ users }) => {
             title: "Name",
             dataIndex: "name",
             key: "name",
-            render: (text) => <p>{text}</p>,
+            render: (text) => <p className="capitalize">{text}</p>,
         },
         {
             title: "Email",
@@ -214,7 +214,10 @@ const UsersClient = ({ users }) => {
     return (
         <>
             {/* button add new user */}
-            <div className="flex w-full justify-end mb-3">
+            <div className="flex w-full justify-between mb-3">
+                <h3 className="text-2xl capitalize text-center md:text-start mb-3">
+                    users
+                </h3>
                 <Button
                     type="primary"
                     className="capitalize"
@@ -257,7 +260,13 @@ const UsersClient = ({ users }) => {
                     <Form.Item label="Password" name="password">
                         <Input.Password />
                     </Form.Item>
-                    <Form.Item label="Role" name="role_id">
+                    <Form.Item
+                        label="Role"
+                        name="role_id"
+                        rules={[
+                            { required: true, message: "Role is required" },
+                        ]}
+                    >
                         <Select
                             placeholder="Select a role of this user"
                             onChange={onRoleChange}
@@ -276,7 +285,11 @@ const UsersClient = ({ users }) => {
                 </Form>
             </Modal>
 
-            <Table columns={columns} dataSource={dataSource} />
+            <Table
+                columns={columns}
+                dataSource={dataSource}
+                pagination={{ pageSize: 10 }}
+            />
         </>
     );
 };

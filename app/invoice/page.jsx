@@ -1,12 +1,13 @@
 import Sidebar from "../components/Sidebar";
+import InvoicesClients from "./invoicesClients";
 
 const Invoice = () => {
     return (
         <>
             <Sidebar />
-            <div className="p-4 sm:ml-64">
-                <h1 className="text-2xl capitalize text-center">invoice</h1>
-            </div>
+            <main className="p-4 px-8 sm:ml-64">
+                <InvoicesClients />
+            </main>
         </>
     );
 };

@@ -156,6 +156,7 @@ const MasterCategoriesClients = ({ category }) => {
             </div>
 
             <Modal
+                centered
                 title={isEditing ? "Edit Category" : "Add New Category"}
                 open={isModalOpen}
                 onCancel={() => {
