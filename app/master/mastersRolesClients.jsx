@@ -151,6 +151,7 @@ const MasterRolesClients = ({ roles }) => {
             <Modal
                 title={isEditing ? "Edit Role" : "Add New Role"}
                 open={isModalOpen}
+                centered
                 onCancel={() => {
                     handleCancel();
                     setIsEditing(false);
