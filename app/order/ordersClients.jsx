@@ -88,7 +88,9 @@ const OrdersClients = ({ orders }) => {
                 total_weight: values.total_weight
                     ? parseFloat(values.total_weight)
                     : null,
-                total_item: values.total_item,
+                total_item: values.total_item
+                    ? parseInt(values.total_item)
+                    : null,
                 total_price: values.total_price,
                 status: values.status,
             };
@@ -118,7 +120,9 @@ const OrdersClients = ({ orders }) => {
                 total_weight: values.total_weight
                     ? parseFloat(values.total_weight)
                     : null,
-                total_item: values.total_item,
+                total_item: values.total_item
+                    ? parseInt(values.total_item)
+                    : null,
                 total_price: values.total_price,
                 status: values.status,
             };
@@ -338,7 +342,7 @@ const OrdersClients = ({ orders }) => {
             try {
                 const res = await getCustomers();
                 setUsers(res);
-                console.log("res users: ", res);
+                console.log("res cust: ", res);
             } catch (error) {
                 message.error("Failed to load users");
             }

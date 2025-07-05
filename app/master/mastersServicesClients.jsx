@@ -219,7 +219,7 @@ const MasterServicesClients = ({ services }) => {
             try {
                 const res = await getCategories();
                 setCategories(res);
-                console.log("res : ", res);
+                console.log("res cat : ", res);
             } catch (error) {
                 message.error("Failed to load categories");
             }
