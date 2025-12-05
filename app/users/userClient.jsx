@@ -41,8 +41,14 @@ const UsersClient = ({ users }) => {
         console.log("isi record", record);
         setIsModalOpen(true);
         setIsEditing(true);
-        setCurrentRecord(record);
-        form.setFieldsValue(record);
+
+        const transformedRecord = {
+            ...record,
+            role: record.roles?.id,
+        };
+
+        setCurrentRecord(transformedRecord);
+        form.setFieldsValue(transformedRecord);
     };
     const handleCancel = () => setIsModalOpen(false);
 
@@ -53,7 +59,7 @@ const UsersClient = ({ users }) => {
                 name: values.name,
                 email: values.email,
                 password: values.password,
-                role_id: values.role_id,
+                role_id: values.role,
                 phone_number: values.phone_number,
             };
 
@@ -81,7 +87,7 @@ const UsersClient = ({ users }) => {
                 name: values.name,
                 email: values.email,
                 password: values.password,
-                role_id: values.role_id,
+                role_id: values.role,
                 phone_number: values.phone_number,
             };
 
@@ -123,7 +129,6 @@ const UsersClient = ({ users }) => {
             const updated = await getUsers();
             setDataSource(updated.map((item) => ({ ...item, key: item.id })));
         } catch (error) {
-            console.log("result", result);
             message.error(error.message);
         }
     };
@@ -139,11 +144,17 @@ const UsersClient = ({ users }) => {
             title: "Email",
             dataIndex: "email",
             key: "email",
+            render: (text) => (
+                <p className="capitalize">
+                    {text == null || text == "" ? "Don't have email" : text}
+                </p>
+            ),
         },
         {
             title: "Role",
-            dataIndex: "role_id",
-            key: "role_id",
+            dataIndex: "roles",
+            key: "role",
+            render: (role) => role?.role || "Unknown",
         },
         {
             title: "Phone Number",
@@ -151,7 +162,7 @@ const UsersClient = ({ users }) => {
             key: "phone_number",
             render: (text) => (
                 <p className="capitalize">
-                    {text == null ? "belum diinput" : text}
+                    {text == null ? "Not inputed yet" : text}
                 </p>
             ),
         },
@@ -204,18 +215,18 @@ const UsersClient = ({ users }) => {
         fetchRole();
     }, []);
 
-    const onRoleChange = async (value) => {
-        const selected = roles.find((role) => role.id === value);
-        if (selected) {
-            form.setFieldsValue({ note: `You selected ${selected.role}` });
-        }
-    };
+    // const onRoleChange = async (value) => {
+    //     const selected = roles.find((role) => role.id === value);
+    //     if (selected) {
+    //         form.setFieldsValue({ note: `You selected ${selected.role}` });
+    //     }
+    // };
 
     return (
         <>
             {/* button add new user */}
             <div className="flex w-full justify-between mb-3">
-                <h3 className="text-2xl capitalize text-center md:text-start mb-3">
+                <h3 className="capitalize text-center md:text-start mb-3">
                     users
                 </h3>
                 <Button
@@ -262,14 +273,17 @@ const UsersClient = ({ users }) => {
                     </Form.Item>
                     <Form.Item
                         label="Role"
-                        name="role_id"
+                        name="role"
                         rules={[
                             { required: true, message: "Role is required" },
                         ]}
                     >
                         <Select
                             placeholder="Select a role of this user"
-                            onChange={onRoleChange}
+                            onChange={(value) =>
+                                form.setFieldsValue({ role: value })
+                            }
+                            // onChange={onRoleChange}
                             allowClear
                         >
                             {roles.map((role) => (

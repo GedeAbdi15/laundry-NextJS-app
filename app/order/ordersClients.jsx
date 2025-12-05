@@ -207,9 +207,9 @@ const OrdersClients = ({ orders }) => {
         },
         {
             title: "Customer",
-            dataIndex: "user_name",
-            key: "user_name",
-            render: (text) => <p className="capitalize">{text}</p>,
+            dataIndex: "users",
+            key: "name",
+            render: (name) => <p className="capitalize">{name?.name}</p>,
         },
         {
             title: "Phone Number",
@@ -223,24 +223,30 @@ const OrdersClients = ({ orders }) => {
         },
         {
             title: "Service",
-            dataIndex: "service_name",
-            key: "service_name",
+            dataIndex: "services",
+            key: "name",
+            render: (name) => <p className="capitalize">{name?.name}</p>,
         },
         {
             title: "Category",
-            dataIndex: "category",
             key: "category",
-            render: (text) => <p className="capitalize">{text}</p>,
+            render: (_, record) => (
+                <p className="capitalize">
+                    {record.services?.master_category?.category}
+                </p>
+            ),
         },
         {
             title: "Type",
             dataIndex: "type",
             key: "type",
+            render: (_, record) => <p>{record.services?.type}</p>,
         },
         {
             title: "Duration (Days)",
             dataIndex: "duration_days",
             key: "duration_days",
+            render: (_, record) => <p>{record.services?.duration_days}</p>,
         },
         {
             title: "Total Weight",
@@ -262,11 +268,13 @@ const OrdersClients = ({ orders }) => {
             title: "Unit",
             dataIndex: "unit",
             key: "unit",
+            render: (_, record) => <p>{record.services?.unit}</p>,
         },
         {
             title: "Price",
             dataIndex: "price",
             key: "price",
+            render: (_, record) => <p>{record.services?.price}</p>,
         },
         {
             title: "Total Price",
@@ -494,7 +502,7 @@ const OrdersClients = ({ orders }) => {
                             onChange={onStatusChange}
                             allowClear
                         >
-                            <Select.Option value="on progress">
+                            <Select.Option value="on_progress">
                                 On Progress
                             </Select.Option>
                             <Select.Option value="done">Done</Select.Option>

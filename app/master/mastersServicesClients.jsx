@@ -151,8 +151,11 @@ const MasterServicesClients = ({ services }) => {
         },
         {
             title: "Category",
-            dataIndex: "category",
+            dataIndex: "master_category",
             key: "category",
+            render: (category) => (
+                <p className="capitalize">{category?.category}</p>
+            ),
         },
         {
             title: "Type",
